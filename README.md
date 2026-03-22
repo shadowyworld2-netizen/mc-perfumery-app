@@ -1,51 +1,69 @@
-# MC Perfumery Web App
+# MC Perfumery App
 
-A web application for MC Perfumery where users can browse and purchase perfumes by messaging the founder Mickey Pienaar on WhatsApp.
+A luxury perfume e-commerce app built with Next.js + Tailwind CSS + MongoDB.
 
 ## Features
 
-- Browse a selection of perfumes
-- Click "Buy Now" to open WhatsApp with a pre-filled message
-- Responsive design
+- Home + Shop + Product detail
+- Cart management (localStorage)
+- Checkout flow with mock payment
+- Login/Signup with JWT + MongoDB hashed password
+- Admin dashboard for product CRUD (protected by admin token)
+- Search + category filter
+- Responsive luxury UI (black/gold/white theme)
 
-## Getting Started
+## Folder structure
 
-### Prerequisites
+- `pages/` - Next.js routes including API endpoints
+- `components/` - common UI components
+- `lib/` - data utilities, cart helpers and DB connection
 
-- Node.js (version 14 or higher)
-- npm
+## Setup
 
-### Installation
+1. Copy `.env.example` to `.env.local`
+2. Set values
 
-1. Clone the repository
-2. Install dependencies:
-   ```
-   npm install
-   ```
+```
+MONGODB_URI=mongodb://localhost:27017
+MONGODB_DB=mc-perfumery-db
+JWT_SECRET=somethingverysecret
+ADMIN_TOKEN=supersecrettoken
+NEXT_PUBLIC_ADMIN_TOKEN=supersecrettoken
+```
 
-### Development
+3. Install dependencies
 
-Run the development server:
+```
+npm install
+```
+
+4. Start development server
+
 ```
 npm run dev
 ```
 
-The app will be available at `http://localhost:5173/`
+5. Seed products
 
-### Build
+```
+curl -X POST http://localhost:3000/api/seed -H "Authorization: Bearer supersecrettoken"
+```
 
-Build for production:
+## Admin
+
+- Open `/admin`
+- Click **Set Admin Token** (sets localStorage token for admin requests)
+- Add/remove products
+
+## Notes
+
+- Cart is stored in `localStorage`.
+- Checkout is mock; payment is simulated.
+- user auth via `/api/auth/login` and `/api/auth/signup`.
+
+## build
+
 ```
 npm run build
+npm run start
 ```
-
-## Usage
-
-- Open the app in your browser
-- Browse the perfumes
-- Click "Buy Now" on any product to open WhatsApp and send a message to Mickey Pienaar
-
-## Contact
-
-Mickey Pienaar  
-Phone: +27 79 990 1892
