@@ -52,11 +52,11 @@ export default function Checkout() {
             {cart.map((item) => (
               <div key={item.id} className="flex justify-between text-sm">
                 <span>{item.name} x{item.quantity}</span>
-                <span>${(item.price * item.quantity).toFixed(2)}</span>
+                <span>R{(item.price * item.quantity).toFixed(2)}</span>
               </div>
             ))}
           </div>
-          <p className="mt-4 text-right text-xl font-bold">Total ${total.toFixed(2)}</p>
+          <p className="mt-4 text-right text-xl font-bold">Total R{total.toFixed(2)}</p>
         </div>
       </div>
     </div>

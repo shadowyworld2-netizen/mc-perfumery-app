@@ -45,18 +45,18 @@ export default function CartPage() {
             </div>
             <div>
               <p className="text-lg font-semibold">{item.name}</p>
-              <p className="text-sm text-gray-600">${item.price.toFixed(2)} each</p>
+              <p className="text-sm text-gray-600">R{item.price.toFixed(2)} each</p>
               <div className="mt-2 flex items-center gap-2">
                 <input type="number" min="1" value={item.quantity} onChange={(e) => updateQty(item.id, Number(e.target.value))} className="w-20 rounded border px-2 py-1" />
                 <button onClick={() => removeItem(item.id)} className="text-sm text-red-600">Remove</button>
               </div>
             </div>
-            <div className="text-right font-semibold">${(item.price * item.quantity).toFixed(2)}</div>
+            <div className="text-right font-semibold">R{(item.price * item.quantity).toFixed(2)}</div>
           </div>
         ))}
       </div>
       <div className="mt-6 flex flex-col items-end gap-3 text-right">
-        <p className="text-xl font-semibold">Total: ${total.toFixed(2)}</p>
+        <p className="text-xl font-semibold">Total: R{total.toFixed(2)}</p>
         <Link href="/checkout"><a className="rounded-lg bg-brand-black px-6 py-2 text-white">Proceed to Checkout</a></Link>
       </div>
     </div>

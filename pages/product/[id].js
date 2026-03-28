@@ -45,7 +45,7 @@ export default function ProductDetail() {
         <div>
           <p className="text-sm uppercase tracking-wide text-gray-500">{product.category}</p>
           <h1 className="mt-2 text-3xl font-bold">{product.name}</h1>
-          <p className="mt-3 text-xl font-semibold text-brand-black">${product.price.toFixed(2)}</p>
+          <p className="mt-3 text-xl font-semibold text-brand-black">R{product.price.toFixed(2)}</p>
           <p className="mt-4 text-gray-700">{product.description}</p>
           <div className="mt-6 flex items-center gap-3">
             <input type="number" min="1" value={qty} onChange={(e) => setQty(Number(e.target.value))} className="w-24 rounded border p-2" />

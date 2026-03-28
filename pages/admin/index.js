@@ -43,11 +43,21 @@ export default function AdminDashboard() {
     loadProducts();
   };
 
-  const deleteProduct = async (id) => {
-    await fetch(`/api/products/${id}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${token || process.env.NEXT_PUBLIC_ADMIN_TOKEN}` },
+  const seedDatabase = async () => {
+    setMessage("");
+    const res = await fetch("/api/seed", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token || process.env.NEXT_PUBLIC_ADMIN_TOKEN}`,
+      },
     });
+    if (!res.ok) {
+      const data = await res.json();
+      setMessage(data.error || "Seed failed");
+      return;
+    }
+    const data = await res.json();
+    setMessage(`Seeded ${data.inserted} products`);
     loadProducts();
   };
 
@@ -57,7 +67,10 @@ export default function AdminDashboard() {
     <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-        <button onClick={() => localStorage.setItem("adminToken", process.env.NEXT_PUBLIC_ADMIN_TOKEN)} className="rounded-lg bg-gold px-3 py-1 text-sm font-semibold">Set Admin Token</button>
+        <div className="flex gap-2">
+          <button onClick={() => localStorage.setItem("adminToken", process.env.NEXT_PUBLIC_ADMIN_TOKEN)} className="rounded-lg bg-gold px-3 py-1 text-sm font-semibold">Set Admin Token</button>
+          <button onClick={seedDatabase} className="rounded-lg bg-blue-500 px-3 py-1 text-sm font-semibold text-white">Seed Database</button>
+        </div>
       </div>
       <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
         <h2 className="text-xl font-semibold">Add a Product</h2>
@@ -78,7 +91,7 @@ export default function AdminDashboard() {
         <div className="mt-4 grid gap-3">
           {products.map((p) => (
             <div key={p._id} className="flex items-center justify-between rounded-lg border p-3">
-              <span className="font-medium">{p.name} - ${p.price.toFixed(2)}</span>
+              <span className="font-medium">{p.name} - R{p.price.toFixed(2)}</span>
               <button onClick={ () => deleteProduct(p._id)} className="rounded-lg bg-red-500 px-3 py-1 text-white">Delete</button>
             </div>
           ))}
