@@ -1,77 +1,180 @@
 import { useEffect, useState } from "react";
 
-const adminAuthToken = typeof window !== "undefined" ? localStorage.getItem("adminToken") : null;
-
 export default function AdminDashboard() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [password, setPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
   const [products, setProducts] = useState([]);
   const [form, setForm] = useState({ name: "", price: "", category: "", description: "", image: "", stock: "" });
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  const token = typeof window !== "undefined" ? localStorage.getItem("adminToken") : null;
+  // Check if already authenticated on mount
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const auth = localStorage.getItem("adminAuth");
+      if (auth === "true") {
+        setIsAuthenticated(true);
+        loadProducts();
+      }
+    }
+  }, []);
 
-  const loadProducts = async () => {
-    const res = await fetch("/api/products");
-    const data = await res.json();
-    setProducts(data.products || []);
-    setLoading(false);
+  const handlePasswordSubmit = (e) => {
+    e.preventDefault();
+    setPasswordError("");
+    
+    if (password === "demi") {
+      localStorage.setItem("adminAuth", "true");
+      setIsAuthenticated(true);
+      setPassword("");
+      loadProducts();
+    } else {
+      setPasswordError("Incorrect password. Please try again.");
+      setPassword("");
+    }
   };
 
-  useEffect(() => {
-    loadProducts();
-  }, []);
+  const loadProducts = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/products");
+      const data = await res.json();
+      setProducts(data.products || []);
+    } catch (err) {
+      setMessage("Failed to load products");
+    }
+    setLoading(false);
+  };
 
   const addProduct = async (e) => {
     e.preventDefault();
     setMessage("");
+    const token = process.env.NEXT_PUBLIC_ADMIN_TOKEN;
     const payload = { ...form, price: Number(form.price), stock: Number(form.stock) };
-    const res = await fetch("/api/products", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token || process.env.NEXT_PUBLIC_ADMIN_TOKEN}`,
-      },
-      body: JSON.stringify(payload),
-    });
-    if (!res.ok) {
-      const data = await res.json();
-      setMessage(data.error || "Add product failed");
-      return;
+    try {
+      const res = await fetch("/api/products", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        setMessage(data.error || "Add product failed");
+        return;
+      }
+      setForm({ name: "", price: "", category: "", description: "", image: "", stock: "" });
+      setMessage("Product added successfully!");
+      loadProducts();
+    } catch (err) {
+      setMessage("Error adding product: " + err.message);
     }
-    setForm({ name: "", price: "", category: "", description: "", image: "", stock: "" });
-    setMessage("Product added");
-    loadProducts();
+  };
+
+  const deleteProduct = async (id) => {
+    setMessage("");
+    const token = process.env.NEXT_PUBLIC_ADMIN_TOKEN;
+    try {
+      const res = await fetch(`/api/products/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!res.ok) {
+        setMessage("Failed to delete product");
+        return;
+      }
+      setMessage("Product deleted successfully!");
+      loadProducts();
+    } catch (err) {
+      setMessage("Error deleting product: " + err.message);
+    }
   };
 
   const seedDatabase = async () => {
     setMessage("");
-    const res = await fetch("/api/seed", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token || process.env.NEXT_PUBLIC_ADMIN_TOKEN}`,
-      },
-    });
-    if (!res.ok) {
+    const token = process.env.NEXT_PUBLIC_ADMIN_TOKEN;
+    try {
+      const res = await fetch("/api/seed", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        setMessage(data.error || "Seed failed");
+        return;
+      }
       const data = await res.json();
-      setMessage(data.error || "Seed failed");
-      return;
+      setMessage(`Seeded ${data.inserted} products`);
+      loadProducts();
+    } catch (err) {
+      setMessage("Error seeding database: " + err.message);
     }
-    const data = await res.json();
-    setMessage(`Seeded ${data.inserted} products`);
-    loadProducts();
   };
 
-  if (loading) return <p className="p-8 text-center">Loading dashboard…</p>;
+  const logout = () => {
+    localStorage.removeItem("adminAuth");
+    setIsAuthenticated(false);
+    setPassword("");
+    setProducts([]);
+  };
 
+  // Password screen
+  if (!isAuthenticated) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-900 to-black">
+        <div className="w-full max-w-md">
+          <div className="rounded-xl bg-white p-8 shadow-2xl">
+            <h1 className="text-2xl font-bold text-center mb-6">Admin Panel</h1>
+            <p className="text-center text-gray-600 mb-6">Enter password to continue</p>
+            <form onSubmit={handlePasswordSubmit} className="space-y-4">
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter password"
+                className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-gold"
+                autoFocus
+              />
+              {passwordError && (
+                <p className="text-sm text-red-600">{passwordError}</p>
+              )}
+              <button
+                type="submit"
+                className="w-full rounded-lg bg-gold px-4 py-2 font-semibold text-white hover:bg-opacity-90 transition"
+              >
+                Continue
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Admin dashboard
   return (
     <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-3xl font-bold">Admin Dashboard</h1>
         <div className="flex gap-2">
-          <button onClick={() => localStorage.setItem("adminToken", process.env.NEXT_PUBLIC_ADMIN_TOKEN)} className="rounded-lg bg-gold px-3 py-1 text-sm font-semibold">Set Admin Token</button>
-          <button onClick={seedDatabase} className="rounded-lg bg-blue-500 px-3 py-1 text-sm font-semibold text-white">Seed Database</button>
+          <button onClick={seedDatabase} className="rounded-lg bg-blue-500 px-3 py-1 text-sm font-semibold text-white hover:bg-blue-600">Seed Database</button>
+          <button onClick={logout} className="rounded-lg bg-red-500 px-3 py-1 text-sm font-semibold text-white hover:bg-red-600">Logout</button>
         </div>
       </div>
+
+      {message && (
+        <div className="mb-4 rounded-lg bg-green-50 p-3 text-sm text-green-800">
+          {message}
+        </div>
+      )}
+
       <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
         <h2 className="text-xl font-semibold">Add a Product</h2>
         <form onSubmit={addProduct} className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -81,20 +184,28 @@ export default function AdminDashboard() {
           <input required value={form.stock} onChange={(e) => setForm(prev => ({ ...prev, stock: e.target.value }))} type="number" placeholder="Stock" className="rounded border px-3 py-2" />
           <input required value={form.image} onChange={(e) => setForm(prev => ({ ...prev, image: e.target.value }))} placeholder="Image URL" className="rounded border px-3 py-2 sm:col-span-2" />
           <textarea required value={form.description} onChange={(e) => setForm(prev => ({ ...prev, description: e.target.value }))} placeholder="Description" className="sm:col-span-2 rounded border px-3 py-2" />
-          <button type="submit" className="sm:col-span-2 rounded-lg bg-brand-black px-4 py-2 text-white">Add Product</button>
+          <button type="submit" className="sm:col-span-2 rounded-lg bg-brand-black px-4 py-2 text-white hover:bg-opacity-90">Add Product</button>
         </form>
-        {message && <p className="mt-3 text-sm text-green-700">{message}</p>}
       </div>
 
       <div className="mt-8 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-        <h2 className="text-xl font-semibold">Products</h2>
+        <h2 className="text-xl font-semibold">Products ({products.length})</h2>
         <div className="mt-4 grid gap-3">
-          {products.map((p) => (
-            <div key={p._id} className="flex items-center justify-between rounded-lg border p-3">
-              <span className="font-medium">{p.name} - R{p.price.toFixed(2)}</span>
-              <button onClick={ () => deleteProduct(p._id)} className="rounded-lg bg-red-500 px-3 py-1 text-white">Delete</button>
-            </div>
-          ))}
+          {loading ? (
+            <p className="text-center text-gray-600">Loading...</p>
+          ) : products.length === 0 ? (
+            <p className="text-center text-gray-600">No products yet. Add one above.</p>
+          ) : (
+            products.map((p) => (
+              <div key={p._id} className="flex items-center justify-between rounded-lg border p-3">
+                <div>
+                  <span className="font-medium">{p.name}</span>
+                  <p className="text-sm text-gray-600">R{parseFloat(p.price).toFixed(2)} | Stock: {p.stock}</p>
+                </div>
+                <button onClick={() => deleteProduct(p._id)} className="rounded-lg bg-red-500 px-3 py-1 text-white hover:bg-red-600">Delete</button>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>
