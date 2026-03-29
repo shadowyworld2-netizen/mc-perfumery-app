@@ -19,11 +19,39 @@ export default function Checkout() {
       setMessage("Please fill all fields.");
       return;
     }
+
     setLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 1200));
-    setMessage("Payment successful! Your order is confirmed.");
-    setCart([]);
-    setCartState([]);
+
+    try {
+      const order = {
+        customerName: name,
+        customerEmail: email,
+        address,
+        total,
+        items: cart,
+      };
+
+      const response = await fetch("/api/email-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(order),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        setMessage(`Order placed, but email failed: ${result.error || result.message}`);
+      } else {
+        setMessage("Payment successful! Your order is confirmed and email sent.");
+      }
+
+      setCart([]);
+      setCartState([]);
+    } catch (err) {
+      console.error("Checkout error:", err);
+      setMessage("Checkout failed. Please try again later.");
+    }
+
     setLoading(false);
   };
 
