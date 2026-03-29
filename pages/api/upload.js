@@ -1,6 +1,12 @@
+import { v2 as cloudinary } from 'cloudinary';
 import { IncomingForm } from 'formidable';
-import { promises as fs } from 'fs';
-import path from 'path';
+
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 export const config = {
   api: {
@@ -13,16 +19,15 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  // Check if Cloudinary is configured
+  if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+    return res.status(500).json({ error: 'Cloudinary not configured. Please set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET environment variables.' });
+  }
+
   try {
     const form = new IncomingForm({
-      uploadDir: path.join(process.cwd(), 'public/uploads'),
       keepExtensions: true,
       maxFileSize: 5 * 1024 * 1024, // 5MB limit
-      filename: (name, ext, part, form) => {
-        const timestamp = Date.now();
-        const random = Math.random().toString(36).substring(2, 8);
-        return `${timestamp}-${random}${ext}`;
-      },
     });
 
     // Parse the form
@@ -38,19 +43,23 @@ export default async function handler(req, res) {
     // Validate file type
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
     if (!allowedTypes.includes(file.mimetype)) {
-      // Clean up the uploaded file
-      await fs.unlink(file.filepath);
       return res.status(400).json({ error: 'Invalid file type. Only JPEG, PNG, WebP, and GIF are allowed.' });
     }
 
-    // Generate the public URL
-    const filename = path.basename(file.filepath);
-    const imageUrl = `/uploads/${filename}`;
+    // Upload to Cloudinary
+    const result = await cloudinary.uploader.upload(file.filepath, {
+      folder: 'mc-perfumery',
+      public_id: `upload_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`,
+      resource_type: 'image',
+      quality: 'auto',
+      format: 'auto',
+    });
 
     res.status(200).json({
       success: true,
-      url: imageUrl,
-      filename: filename
+      url: result.secure_url,
+      public_id: result.public_id,
+      filename: result.original_filename
     });
 
   } catch (error) {

@@ -31,6 +31,7 @@ export default function AdminDashboard() {
   const [uploadedFiles, setUploadedFiles] = useState({});
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [cloudinaryConfigured, setCloudinaryConfigured] = useState(true);
 
   // Check if already authenticated on mount
   useEffect(() => {
@@ -425,6 +426,7 @@ export default function AdminDashboard() {
           </div>
           <div>
             <label className="block text-sm font-medium mb-2">Or Upload Logo Image:</label>
+            <p className="text-xs text-amber-600 mb-2">⚠️ Requires Cloudinary setup in environment variables</p>
             <div className="flex gap-2">
               <input
                 type="file"
@@ -500,6 +502,7 @@ export default function AdminDashboard() {
             </div>
             <div className="sm:col-span-2">
               <label className="block text-sm font-medium mb-2">Or Upload Hero Image:</label>
+              <p className="text-xs text-amber-600 mb-2">⚠️ Requires Cloudinary setup in environment variables</p>
               <div className="flex gap-2">
                 <input
                   type="file"
@@ -558,6 +561,7 @@ export default function AdminDashboard() {
           <input required value={form.image} onChange={(e) => setForm(prev => ({ ...prev, image: e.target.value }))} placeholder="Image URL" className="rounded border px-3 py-2 sm:col-span-2" />
           <div className="sm:col-span-2">
             <label className="block text-sm font-medium mb-2">Or Upload Product Image:</label>
+            <p className="text-xs text-amber-600 mb-2">⚠️ Requires Cloudinary setup in environment variables</p>
             <div className="flex gap-2">
               <input
                 type="file"
@@ -592,6 +596,7 @@ export default function AdminDashboard() {
               <input value={editForm.image} onChange={(e) => setEditForm(prev => ({ ...prev, image: e.target.value }))} placeholder="Image URL" className="rounded border px-3 py-2 sm:col-span-2" />
               <div className="sm:col-span-2">
                 <label className="block text-sm font-medium mb-2">Or Upload New Image:</label>
+                <p className="text-xs text-amber-600 mb-2">⚠️ Requires Cloudinary setup in environment variables</p>
                 <div className="flex gap-2">
                   <input
                     type="file"
