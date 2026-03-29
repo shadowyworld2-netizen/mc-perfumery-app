@@ -35,10 +35,8 @@ export default function Home({ products }) {
           <p className="mt-4 text-lg text-white/80">{homeContent.description}</p>
           <Link href="/products"><a className="mt-6 inline-block rounded-lg bg-gold px-6 py-3 font-semibold text-brand-black">{homeContent.ctaText}</a></Link>
         </div>
-        <div className="rounded-2xl border border-white/10 bg-white/10 p-4">
-          <div className="relative h-80 w-full rounded-xl overflow-hidden">
-            <img src={homeContent.heroImage} alt="perfume" className="w-full h-full object-cover" />
-          </div>
+        <div className="relative h-full min-h-[400px] w-full overflow-hidden">
+          <img src={homeContent.heroImage} alt="perfume" className="w-full h-full object-cover" />
         </div>
       </section>
 
