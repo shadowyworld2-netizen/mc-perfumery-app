@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { getCart, setCart } from "../lib/cart";
 
@@ -41,7 +40,7 @@ export default function CartPage() {
         {cart.map((item) => (
           <div key={item.id} className="grid grid-cols-1 items-center gap-4 rounded-xl border border-gray-200 bg-white p-4 md:grid-cols-[auto_1fr_auto]">
             <div className="relative h-24 w-24 overflow-hidden rounded-lg">
-              <Image src={item.image} alt={item.name} fill className="object-cover" />
+              <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
             </div>
             <div>
               <p className="text-lg font-semibold">{item.name}</p>

@@ -1,11 +1,10 @@
-import Image from "next/image";
 import Link from "next/link";
 
 export default function ProductCard({ product }) {
   return (
     <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition hover:-translate-y-1">
       <div className="h-52 overflow-hidden rounded-lg bg-slate-100 relative">
-        <Image src={product.image} alt={product.name} fill className="object-cover" />
+        <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
       </div>
       <div className="mt-4">
         <span className="text-xs uppercase tracking-widest text-gray-500">{product.category}</span>
