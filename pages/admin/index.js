@@ -46,12 +46,20 @@ export default function AdminDashboard() {
 
   const loadProducts = async () => {
     setLoading(true);
+    setMessage("");
     try {
       const res = await fetch("/api/products");
+      if (!res.ok) {
+        const errorData = await res.json();
+        setMessage("Error loading products: " + (errorData.error || res.statusText));
+        setLoading(false);
+        return;
+      }
       const data = await res.json();
       setProducts(data.products || []);
     } catch (err) {
-      setMessage("Failed to load products");
+      console.error("Load products error:", err);
+      setMessage("Failed to load products: " + err.message);
     }
     setLoading(false);
   };
@@ -187,6 +195,21 @@ export default function AdminDashboard() {
     setProducts([]);
   };
 
+  const testConnection = async () => {
+    setMessage("");
+    try {
+      const res = await fetch("/api/health");
+      const data = await res.json();
+      if (data.status === "ok") {
+        setMessage("✓ MongoDB connection is working!");
+      } else {
+        setMessage("✗ MongoDB connection failed: " + data.error);
+      }
+    } catch (err) {
+      setMessage("Connection test failed: " + err.message);
+    }
+  };
+
   // Password screen
   if (!isAuthenticated) {
     return (
@@ -226,13 +249,18 @@ export default function AdminDashboard() {
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-3xl font-bold">Admin Dashboard</h1>
         <div className="flex gap-2">
+          <button onClick={testConnection} className="rounded-lg bg-purple-500 px-3 py-1 text-sm font-semibold text-white hover:bg-purple-600">Test Connection</button>
           <button onClick={seedDatabase} className="rounded-lg bg-blue-500 px-3 py-1 text-sm font-semibold text-white hover:bg-blue-600">Seed Database</button>
           <button onClick={logout} className="rounded-lg bg-red-500 px-3 py-1 text-sm font-semibold text-white hover:bg-red-600">Logout</button>
         </div>
       </div>
 
       {message && (
-        <div className="mb-4 rounded-lg bg-green-50 p-3 text-sm text-green-800 border border-green-200">
+        <div className={`mb-4 rounded-lg p-3 text-sm border ${
+          message.includes("✓") || message.includes("successfully") 
+            ? "bg-green-50 text-green-800 border-green-200" 
+            : "bg-red-50 text-red-800 border-red-200"
+        }`}>
           {message}
         </div>
       )}
