@@ -40,7 +40,7 @@ export default function ProductDetail() {
     <div className="mx-auto max-w-6xl px-4 pb-16 sm:px-6 lg:px-8">
       <div className="mt-8 grid gap-8 lg:grid-cols-2">
         <div className="relative h-96 w-full rounded-2xl overflow-hidden">
-          <Image src={product.image} alt={product.name} layout="fill" objectFit="cover" />
+          <Image src={product.image} alt={product.name} fill className="object-cover" />
         </div>
         <div>
           <p className="text-sm uppercase tracking-wide text-gray-500">{product.category}</p>
