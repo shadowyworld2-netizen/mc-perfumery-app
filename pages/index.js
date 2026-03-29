@@ -16,7 +16,7 @@ export default function Home({ products }) {
         </div>
         <div className="rounded-2xl border border-white/10 bg-white/10 p-4">
           <div className="relative h-80 w-full rounded-xl overflow-hidden">
-            <Image src="https://images.unsplash.com/photo-1556228724-5a74a6440f86?auto=format&fit=crop&w=900&q=80" alt="perfume" layout="fill" objectFit="cover" />
+            <Image src="https://images.unsplash.com/photo-1556228724-5a74a6440f86?auto=format&fit=crop&w=900&q=80" alt="perfume" fill className="object-cover" />
           </div>
         </div>
       </section>
