@@ -10,6 +10,24 @@ export default function AdminDashboard() {
   const [editForm, setEditForm] = useState({ name: "", price: "", category: "", description: "", image: "", stock: "" });
   const [logo, setLogo] = useState("MC PERFUMERY");
   const [logoInput, setLogoInput] = useState("");
+  const [homeContent, setHomeContent] = useState({
+    subtitle: "Luxury perfume boutique",
+    title: "Experience allure in every drop",
+    description: "Explore curated blends of floral, oud, vanilla and ocean notes for a modern yet timeless presence.",
+    ctaText: "Shop Perfumes",
+    heroImage: "https://images.unsplash.com/photo-1556228724-5a74a6440f86?auto=format&fit=crop&w=900&q=80",
+    sectionTitle: "Featured Products",
+    viewAllText: "View all"
+  });
+  const [homeInputs, setHomeInputs] = useState({
+    subtitle: "",
+    title: "",
+    description: "",
+    ctaText: "",
+    heroImage: "",
+    sectionTitle: "",
+    viewAllText: ""
+  });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
@@ -24,6 +42,15 @@ export default function AdminDashboard() {
         if (savedLogo) {
           setLogo(savedLogo);
           setLogoInput(savedLogo);
+        }
+        // Load home content
+        const savedHomeContent = localStorage.getItem("homeContent");
+        if (savedHomeContent) {
+          const parsed = JSON.parse(savedHomeContent);
+          setHomeContent(parsed);
+          setHomeInputs(parsed);
+        } else {
+          setHomeInputs(homeContent);
         }
       }
     }
@@ -71,6 +98,13 @@ export default function AdminDashboard() {
       setMessage("Logo updated successfully!");
       setTimeout(() => setMessage(""), 3000);
     }
+  };
+
+  const updateHomeContent = () => {
+    localStorage.setItem("homeContent", JSON.stringify(homeInputs));
+    setHomeContent(homeInputs);
+    setMessage("Home screen content updated successfully!");
+    setTimeout(() => setMessage(""), 3000);
   };
 
   const addProduct = async (e) => {
@@ -290,6 +324,93 @@ export default function AdminDashboard() {
                 Update Logo
               </button>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Home Screen Management */}
+      <div className="mb-8 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+        <h2 className="text-xl font-semibold mb-4">Home Screen Content</h2>
+        <div className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className="block text-sm font-medium mb-2">Hero Subtitle:</label>
+              <input
+                type="text"
+                value={homeInputs.subtitle}
+                onChange={(e) => setHomeInputs(prev => ({ ...prev, subtitle: e.target.value }))}
+                placeholder="Luxury perfume boutique"
+                className="w-full rounded border px-3 py-2"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Hero Title:</label>
+              <input
+                type="text"
+                value={homeInputs.title}
+                onChange={(e) => setHomeInputs(prev => ({ ...prev, title: e.target.value }))}
+                placeholder="Experience allure in every drop"
+                className="w-full rounded border px-3 py-2"
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <label className="block text-sm font-medium mb-2">Hero Description:</label>
+              <textarea
+                value={homeInputs.description}
+                onChange={(e) => setHomeInputs(prev => ({ ...prev, description: e.target.value }))}
+                placeholder="Explore curated blends..."
+                className="w-full rounded border px-3 py-2"
+                rows="3"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">CTA Button Text:</label>
+              <input
+                type="text"
+                value={homeInputs.ctaText}
+                onChange={(e) => setHomeInputs(prev => ({ ...prev, ctaText: e.target.value }))}
+                placeholder="Shop Perfumes"
+                className="w-full rounded border px-3 py-2"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Hero Image URL:</label>
+              <input
+                type="url"
+                value={homeInputs.heroImage}
+                onChange={(e) => setHomeInputs(prev => ({ ...prev, heroImage: e.target.value }))}
+                placeholder="https://..."
+                className="w-full rounded border px-3 py-2"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Products Section Title:</label>
+              <input
+                type="text"
+                value={homeInputs.sectionTitle}
+                onChange={(e) => setHomeInputs(prev => ({ ...prev, sectionTitle: e.target.value }))}
+                placeholder="Featured Products"
+                className="w-full rounded border px-3 py-2"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">View All Link Text:</label>
+              <input
+                type="text"
+                value={homeInputs.viewAllText}
+                onChange={(e) => setHomeInputs(prev => ({ ...prev, viewAllText: e.target.value }))}
+                placeholder="View all"
+                className="w-full rounded border px-3 py-2"
+              />
+            </div>
+          </div>
+          <div className="flex justify-end">
+            <button
+              onClick={updateHomeContent}
+              className="rounded-lg bg-blue-500 px-6 py-2 font-semibold text-white hover:bg-blue-600"
+            >
+              Update Home Screen
+            </button>
           </div>
         </div>
       </div>
