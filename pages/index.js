@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import ProductCard from "../components/ProductCard";
 import { sampleProducts } from "../lib/seedData";
+import clientPromise from "../lib/mongo";
 
 export default function Home({ products }) {
   return (
@@ -37,10 +38,24 @@ export default function Home({ products }) {
 }
 
 export async function getStaticProps() {
-  // allow fallback for local seed
-  return {
-    props: {
-      products: sampleProducts,
-    },
-  };
+  try {
+    const client = await clientPromise;
+    const db = client.db(process.env.MONGODB_DB || "mc-perfumery-db");
+    const products = await db.collection("products").find({}).toArray();
+
+    return {
+      props: {
+        products: JSON.parse(JSON.stringify(products)),
+      },
+      revalidate: 60,
+    };
+  } catch (err) {
+    console.error("Error loading products for home:", err);
+    return {
+      props: {
+        products: sampleProducts,
+      },
+      revalidate: 60,
+    };
+  }
 }
