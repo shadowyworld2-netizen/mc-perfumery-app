@@ -28,6 +28,7 @@ export default function AdminDashboard() {
     sectionTitle: "",
     viewAllText: ""
   });
+  const [uploadedFiles, setUploadedFiles] = useState({});
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
@@ -105,6 +106,103 @@ export default function AdminDashboard() {
     setHomeContent(homeInputs);
     setMessage("Home screen content updated successfully!");
     setTimeout(() => setMessage(""), 3000);
+  };
+
+  const handleFileUpload = (event, type) => {
+    const file = event.target.files[0];
+    if (file) {
+      setUploadedFiles(prev => ({ ...prev, [type]: file }));
+    }
+  };
+
+  const uploadFile = async (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await fetch('/api/upload', {
+      method: 'POST',
+      body: formData,
+    });
+
+    const result = await response.json();
+    if (!response.ok) {
+      throw new Error(result.error || 'Upload failed');
+    }
+    return result.url;
+  };
+
+  const updateLogoImage = async () => {
+    if (!uploadedFiles.logo) {
+      setMessage("Please select a logo image first");
+      return;
+    }
+    try {
+      setLoading(true);
+      const imageUrl = await uploadFile(uploadedFiles.logo);
+      setLogo(imageUrl);
+      localStorage.setItem("siteLogo", imageUrl);
+      setLogoInput(imageUrl);
+      setMessage("Logo image uploaded successfully!");
+      setUploadedFiles(prev => ({ ...prev, logo: null }));
+    } catch (error) {
+      setMessage("Logo upload failed: " + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateHeroImage = async () => {
+    if (!uploadedFiles.heroImage) {
+      setMessage("Please select a hero image first");
+      return;
+    }
+    try {
+      setLoading(true);
+      const imageUrl = await uploadFile(uploadedFiles.heroImage);
+      setHomeInputs(prev => ({ ...prev, heroImage: imageUrl }));
+      setMessage("Hero image uploaded successfully!");
+      setUploadedFiles(prev => ({ ...prev, heroImage: null }));
+    } catch (error) {
+      setMessage("Hero image upload failed: " + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateProductImage = async () => {
+    if (!uploadedFiles.productImage) {
+      setMessage("Please select a product image first");
+      return;
+    }
+    try {
+      setLoading(true);
+      const imageUrl = await uploadFile(uploadedFiles.productImage);
+      setForm(prev => ({ ...prev, image: imageUrl }));
+      setMessage("Product image uploaded successfully!");
+      setUploadedFiles(prev => ({ ...prev, productImage: null }));
+    } catch (error) {
+      setMessage("Product image upload failed: " + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateEditProductImage = async () => {
+    if (!uploadedFiles.editProductImage) {
+      setMessage("Please select a product image first");
+      return;
+    }
+    try {
+      setLoading(true);
+      const imageUrl = await uploadFile(uploadedFiles.editProductImage);
+      setEditForm(prev => ({ ...prev, image: imageUrl }));
+      setMessage("Product image uploaded successfully!");
+      setUploadedFiles(prev => ({ ...prev, editProductImage: null }));
+    } catch (error) {
+      setMessage("Product image upload failed: " + error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const addProduct = async (e) => {
@@ -308,7 +406,7 @@ export default function AdminDashboard() {
             <p className="text-2xl font-bold text-gold">{logo}</p>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2">Change Logo:</label>
+            <label className="block text-sm font-medium mb-2">Change Logo Text:</label>
             <div className="flex gap-2">
               <input
                 type="text"
@@ -321,7 +419,24 @@ export default function AdminDashboard() {
                 onClick={updateLogo}
                 className="rounded-lg bg-gold px-4 py-2 font-semibold text-white hover:bg-opacity-90"
               >
-                Update Logo
+                Update Text
+              </button>
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-2">Or Upload Logo Image:</label>
+            <div className="flex gap-2">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => handleFileUpload(e, 'logo')}
+                className="flex-1 rounded border px-3 py-2"
+              />
+              <button
+                onClick={() => updateLogoImage()}
+                className="rounded-lg bg-blue-500 px-4 py-2 font-semibold text-white hover:bg-blue-600"
+              >
+                Upload Image
               </button>
             </div>
           </div>
@@ -383,6 +498,23 @@ export default function AdminDashboard() {
                 className="w-full rounded border px-3 py-2"
               />
             </div>
+            <div className="sm:col-span-2">
+              <label className="block text-sm font-medium mb-2">Or Upload Hero Image:</label>
+              <div className="flex gap-2">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleFileUpload(e, 'heroImage')}
+                  className="flex-1 rounded border px-3 py-2"
+                />
+                <button
+                  onClick={() => updateHeroImage()}
+                  className="rounded-lg bg-green-500 px-4 py-2 font-semibold text-white hover:bg-green-600"
+                >
+                  Upload Image
+                </button>
+              </div>
+            </div>
             <div>
               <label className="block text-sm font-medium mb-2">Products Section Title:</label>
               <input
@@ -424,6 +556,24 @@ export default function AdminDashboard() {
           <input required value={form.category} onChange={(e) => setForm(prev => ({ ...prev, category: e.target.value }))} placeholder="Category" className="rounded border px-3 py-2" />
           <input required value={form.stock} onChange={(e) => setForm(prev => ({ ...prev, stock: e.target.value }))} type="number" placeholder="Stock" className="rounded border px-3 py-2" />
           <input required value={form.image} onChange={(e) => setForm(prev => ({ ...prev, image: e.target.value }))} placeholder="Image URL" className="rounded border px-3 py-2 sm:col-span-2" />
+          <div className="sm:col-span-2">
+            <label className="block text-sm font-medium mb-2">Or Upload Product Image:</label>
+            <div className="flex gap-2">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => handleFileUpload(e, 'productImage')}
+                className="flex-1 rounded border px-3 py-2"
+              />
+              <button
+                type="button"
+                onClick={() => updateProductImage()}
+                className="rounded-lg bg-purple-500 px-4 py-2 font-semibold text-white hover:bg-purple-600"
+              >
+                Upload Image
+              </button>
+            </div>
+          </div>
           <textarea required value={form.description} onChange={(e) => setForm(prev => ({ ...prev, description: e.target.value }))} placeholder="Description" className="sm:col-span-2 rounded border px-3 py-2" />
           <button type="submit" className="sm:col-span-2 rounded-lg bg-brand-black px-4 py-2 text-white hover:bg-opacity-90">Add Product</button>
         </form>
@@ -440,6 +590,24 @@ export default function AdminDashboard() {
               <input value={editForm.category} onChange={(e) => setEditForm(prev => ({ ...prev, category: e.target.value }))} placeholder="Category" className="rounded border px-3 py-2" />
               <input type="number" value={editForm.stock} onChange={(e) => setEditForm(prev => ({ ...prev, stock: e.target.value }))} placeholder="Stock" className="rounded border px-3 py-2" />
               <input value={editForm.image} onChange={(e) => setEditForm(prev => ({ ...prev, image: e.target.value }))} placeholder="Image URL" className="rounded border px-3 py-2 sm:col-span-2" />
+              <div className="sm:col-span-2">
+                <label className="block text-sm font-medium mb-2">Or Upload New Image:</label>
+                <div className="flex gap-2">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleFileUpload(e, 'editProductImage')}
+                    className="flex-1 rounded border px-3 py-2"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => updateEditProductImage()}
+                    className="rounded-lg bg-purple-500 px-4 py-2 font-semibold text-white hover:bg-purple-600"
+                  >
+                    Upload Image
+                  </button>
+                </div>
+              </div>
               {editForm.image && (
                 <div className="sm:col-span-2">
                   <img src={editForm.image} alt="Preview" className="h-32 w-32 object-cover rounded border" />
